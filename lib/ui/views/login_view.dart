@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pruebajimenez/ui/views/principal.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -51,11 +52,17 @@ class LoginView extends StatelessWidget {
             ),
             // button
             ElevatedButton(
-              onPressed: () => {},
+              onPressed: () => {
+                Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SecondScreen()),
+            ),
+              },
               child: const Text(
                 'Iniciar sesion',
               ),
             )
+            
           ],
         ),
       ),
