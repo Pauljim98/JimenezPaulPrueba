@@ -356,19 +356,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
               ),
             ),
             SizedBox(height: 10),
-            Checkbox(
-              value: _isCompleted,
-              onChanged: (value) {
-                setState(() {
-                  _isCompleted = value!;
-                });
-              },
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Completada: ${_isCompleted ? "Sí" : "No"}',
-              style: TextStyle(fontSize: 16),
-            ),
+            
           ],
         ),
       ),
