@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SecondScreen extends StatelessWidget {
-  @override
-   Widget build(BuildContext context) {
+ @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Lista de Tareas',
       theme: ThemeData(
@@ -38,6 +38,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
               _showConfirmationDialog();
             },
           ),
+          IconButton(
+            icon: Icon(Icons.assignment_turned_in),
+            onPressed: () {
+              _showCompletedTasksReport();
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.history),
+            onPressed: () {
+              _navigateToTaskHistory();
+            },
+          ),
         ],
       ),
       body: ListView.builder(
@@ -47,7 +59,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             task: selectedTaskList[index],
             onCheckboxChanged: (value) {
               setState(() {
-                selectedTaskList[index].isCompleted = value!;
+                selectedTaskList[index].isCompleted = value;
                 if (value) {
                   _showCompletionMessage();
                   _clearCompletedTasks();
@@ -97,7 +109,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       context: context,
       builder: (BuildContext context) {
         String taskName = '';
-        String taskDescription = ''; // Nueva variable para la descripción
+        String taskDescription = '';
 
         return AlertDialog(
           title: Text('Nueva Tarea'),
@@ -212,11 +224,53 @@ class _TaskListScreenState extends State<TaskListScreen> {
       selectedTaskList.removeWhere((task) => task.isCompleted);
     });
   }
+
+  void _showCompletedTasksReport() {
+    List<Task> completedTasks = selectedTaskList.where((task) => task.isCompleted).toList();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Informe de Tareas Completadas'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (completedTasks.isNotEmpty)
+                for (var task in completedTasks)
+                  ListTile(
+                    title: Text(task.name),
+                    subtitle: Text(task.description ?? ''),
+                  )
+              else
+                Text('No hay tareas completadas.'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _navigateToTaskHistory() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => TaskHistoryScreen(),
+      ),
+    );
+  }
 }
 
 class Task {
   String name;
-  String? description; // Puede ser nulo
+  String? description;
   bool isCompleted;
 
   Task({required this.name, this.description, required this.isCompleted});
@@ -234,7 +288,7 @@ class TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(task.name),
-      subtitle: Text(task.description ?? ''), // Muestra la descripción si no es nula
+      subtitle: Text(task.description ?? ''),
       leading: Checkbox(
         value: task.isCompleted,
         onChanged: onCheckboxChanged,
@@ -336,5 +390,19 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+}
+
+class TaskHistoryScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Historial de Tareas Completadas'),
+      ),
+      body: Center(
+        child: Text('Aquí puedes mostrar el historial de tareas completadas.'),
+      ),
+    );
   }
 }
