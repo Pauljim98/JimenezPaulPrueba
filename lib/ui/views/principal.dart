@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class SecondScreen extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Lista de Tareas',
       theme: ThemeData(
@@ -31,6 +31,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_showPersonalTasks ? 'Tareas Personales' : 'Tareas de Trabajo'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_forever),
+            onPressed: () {
+              _showConfirmationDialog();
+            },
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: selectedTaskList.length,
@@ -42,6 +50,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 selectedTaskList[index].isCompleted = value!;
                 if (value) {
                   _showCompletionMessage();
+                  _clearCompletedTasks();
                 }
               });
             },
@@ -163,6 +172,45 @@ class _TaskListScreenState extends State<TaskListScreen> {
         content: Text('Tarea completada'),
       ),
     );
+  }
+
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmación'),
+          content: Text('¿Seguro que desea eliminar todas las tareas?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _clearAllTasks();
+              },
+              child: Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _clearAllTasks() {
+    setState(() {
+      selectedTaskList.clear();
+    });
+  }
+
+  void _clearCompletedTasks() {
+    setState(() {
+      selectedTaskList.removeWhere((task) => task.isCompleted);
+    });
   }
 }
 
