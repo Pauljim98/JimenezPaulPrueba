@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SecondScreen extends StatelessWidget {
- @override
+   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Lista de Tareas',
@@ -21,6 +21,8 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   List<Task> personalTasks = [];
   List<Task> workTasks = [];
+  List<Task> completedTasks = [];
+  List<Task> deletedTasks = [];
 
   List<Task> get selectedTaskList => _showPersonalTasks ? personalTasks : workTasks;
 
@@ -44,12 +46,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               _showCompletedTasksReport();
             },
           ),
-          IconButton(
-            icon: Icon(Icons.history),
-            onPressed: () {
-              _navigateToTaskHistory();
-            },
-          ),
+          
         ],
       ),
       body: ListView.builder(
@@ -59,7 +56,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             task: selectedTaskList[index],
             onCheckboxChanged: (value) {
               setState(() {
-                selectedTaskList[index].isCompleted = value;
+                selectedTaskList[index].isCompleted = value!;
                 if (value) {
                   _showCompletionMessage();
                   _clearCompletedTasks();
@@ -67,9 +64,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               });
             },
             onDeletePressed: () {
-              setState(() {
-                selectedTaskList.removeAt(index);
-              });
+              _deleteTask(selectedTaskList[index]);
             },
             onTap: () {
               _showTaskDetails(context, selectedTaskList[index]);
@@ -213,20 +208,30 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
+  void _deleteTask(Task task) {
+    setState(() {
+      selectedTaskList.remove(task);
+      deletedTasks.add(task);
+    });
+  }
+
   void _clearAllTasks() {
     setState(() {
+      deletedTasks.addAll(selectedTaskList);
       selectedTaskList.clear();
     });
   }
 
   void _clearCompletedTasks() {
     setState(() {
+      completedTasks.addAll(selectedTaskList.where((task) => task.isCompleted));
       selectedTaskList.removeWhere((task) => task.isCompleted);
     });
   }
 
   void _showCompletedTasksReport() {
-    List<Task> completedTasks = selectedTaskList.where((task) => task.isCompleted).toList();
+    List<Task> completedTasksToShow = selectedTaskList.where((task) => task.isCompleted).toList();
+    completedTasksToShow.addAll(completedTasks);
 
     showDialog(
       context: context,
@@ -236,8 +241,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (completedTasks.isNotEmpty)
-                for (var task in completedTasks)
+              if (completedTasksToShow.isNotEmpty)
+                for (var task in completedTasksToShow)
                   ListTile(
                     title: Text(task.name),
                     subtitle: Text(task.description ?? ''),
@@ -259,13 +264,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  void _navigateToTaskHistory() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => TaskHistoryScreen(),
-      ),
-    );
-  }
+  
 }
 
 class Task {
@@ -393,16 +392,3 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   }
 }
 
-class TaskHistoryScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Historial de Tareas Completadas'),
-      ),
-      body: Center(
-        child: Text('Aquí puedes mostrar el historial de tareas completadas.'),
-      ),
-    );
-  }
-}
